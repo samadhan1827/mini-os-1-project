@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Disk Scheduling Visualizer
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+
+        <h1>
+            Disk Scheduling Visualizer
+        </h1>
+
+        <p>
+            SSTF • LOOK • C-LOOK
+        </p>
+
+    </header>
+
+
+    <!-- INPUT -->
+
+    <section class="card">
+
+        <h2>
+            Disk Configuration
+        </h2>
+
+        <div class="input-grid">
+
+            <div>
+
+                <label>
+                    Initial Head Position
+                </label>
+
+                <input
+                    type="number"
+                    id="head"
+                    value="53"
+                    min="0"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Disk Size
+                </label>
+
+                <input
+                    type="number"
+                    id="diskSize"
+                    value="200"
+                    min="1"
+                >
+
+            </div>
+
+
+            <div class="full">
+
+                <label>
+                    Disk Requests
+                </label>
+
+                <input
+                    type="text"
+                    id="requests"
+                    value="98,183,37,122,14,65,67"
+                >
+
+                <small>
+                    Example: 98,183,37,122,14,65,67
+                </small>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Initial Direction
+                </label>
+
+                <select id="direction">
+
+                    <option value="right">
+                        Right →
+                    </option>
+
+                    <option value="left">
+                        Left ←
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <button id="calculateButton"
+                onclick="calculate()">
+
+            Calculate & Visualize
+
+        </button>
+
+        <p id="error"
+           class="error">
+        </p>
+
+    </section>
+
+
+    <!-- RESULTS -->
+
+    <section id="results"
+             style="display:none;">
+
+        <div class="card">
+
+            <h2>
+                Disk Head Movement
+            </h2>
+
+            <p class="info">
+                Initial Head:
+                <strong id="initialHead"></strong>
+                &nbsp; | &nbsp;
+                Direction:
+                <strong id="initialDirection"></strong>
+            </p>
+
+
+            <!-- TIMELINE -->
+
+            <div class="timeline-container">
+
+                <div class="timeline"
+                     id="timeline">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ALGORITHM CARDS -->
+
+        <div class="algorithm-grid">
+
+
+            <!-- SSTF -->
+
+            <div class="algorithm-card">
+
+                <div class="algorithm-header">
+
+                    <h2>
+                        SSTF
+                    </h2>
+
+                    <span>
+                        Shortest Seek Time First
+                    </span>
+
+                </div>
+
+                <div class="metric">
+
+                    <strong id="sstfMovement">
+                        0
+                    </strong>
+
+                    <span>
+                        cylinders
+                    </span>
+
+                </div>
+
+                <p>
+                    <strong>
+                        Sequence:
+                    </strong>
+                </p>
+
+                <div id="sstfSequence"
+                     class="sequence">
+                </div>
+
+                <div id="sstfVisualization"
+                     class="mini-timeline">
+                </div>
+
+            </div>
+
+
+            <!-- LOOK -->
+
+            <div class="algorithm-card">
+
+                <div class="algorithm-header">
+
+                    <h2>
+                        LOOK
+                    </h2>
+
+                    <span>
+                        Directional Scheduling
+                    </span>
+
+                </div>
+
+                <div class="metric">
+
+                    <strong id="lookMovement">
+                        0
+                    </strong>
+
+                    <span>
+                        cylinders
+                    </span>
+
+                </div>
+
+                <p>
+                    <strong>
+                        Sequence:
+                    </strong>
+                </p>
+
+                <div id="lookSequence"
+                     class="sequence">
+                </div>
+
+                <div id="lookVisualization"
+                     class="mini-timeline">
+                </div>
+
+            </div>
+
+
+            <!-- C-LOOK -->
+
+            <div class="algorithm-card">
+
+                <div class="algorithm-header">
+
+                    <h2>
+                        C-LOOK
+                    </h2>
+
+                    <span>
+                        Circular LOOK
+                    </span>
+
+                </div>
+
+                <div class="metric">
+
+                    <strong id="clookMovement">
+                        0
+                    </strong>
+
+                    <span>
+                        cylinders
+                    </span>
+
+                </div>
+
+                <p>
+                    <strong>
+                        Sequence:
+                    </strong>
+                </p>
+
+                <div id="clookSequence"
+                     class="sequence">
+                </div>
+
+                <div id="clookVisualization"
+                     class="mini-timeline">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- COMPARISON -->
+
+        <div class="card">
+
+            <h2>
+                Seek Time Comparison
+            </h2>
+
+            <div class="comparison-chart">
+
+                <div class="bar-row">
+
+                    <span>
+                        SSTF
+                    </span>
+
+                    <div class="bar-background">
+
+                        <div id="sstfBar"
+                             class="bar">
+
+                        </div>
+
+                    </div>
+
+                    <strong id="sstfBarValue">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="bar-row">
+
+                    <span>
+                        LOOK
+                    </span>
+
+                    <div class="bar-background">
+
+                        <div id="lookBar"
+                             class="bar">
+
+                        </div>
+
+                    </div>
+
+                    <strong id="lookBarValue">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="bar-row">
+
+                    <span>
+                        C-LOOK
+                    </span>
+
+                    <div class="bar-background">
+
+                        <div id="clookBar"
+                             class="bar">
+
+                        </div>
+
+                    </div>
+
+                    <strong id="clookBarValue">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div id="bestAlgorithm"
+                 class="best">
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}">
+</script>
+
+</body>
+
+</html>
